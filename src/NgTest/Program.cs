@@ -2,7 +2,7 @@
 
 string searchPattern = "*.spec.ts";
 
-var angularJsonFilePath = GetFilePath("angular.json", currentDirectory);
+var appDirectory = Path.GetDirectoryName(GetFilePath("angular.json", currentDirectory));
 
 var projectDirectory = Path.GetDirectoryName(GetFilePath("tsconfig.*", currentDirectory));
 
@@ -37,9 +37,11 @@ foreach (var path in new DirectoryInfo(currentDirectory).GetFiles(searchPattern)
     {
         if(line.Trim().StartsWith("describe"))
         {
-            var indexOfFirstQuote = line.IndexOf("'");
+            var indexOfFirstQuote = line.IndexOf("'") + 1;
 
-            var lengthOfTestName = line.Substring(indexOfFirstQuote).IndexOf("'");
+            var indexOfSecondQuote = line.Substring(indexOfFirstQuote).IndexOf("'");
+
+            var lengthOfTestName = indexOfSecondQuote;
 
             testName = line.Substring(indexOfFirstQuote, lengthOfTestName);
 
@@ -47,7 +49,7 @@ foreach (var path in new DirectoryInfo(currentDirectory).GetFiles(searchPattern)
         }
     }
 
-    await CommandAsync($"ng test --test-name-pattern='{testName}' --watch --project {root}", projectDirectory);
+    await CommandAsync($"ng test --test-name-pattern='{testName}' --watch --project {root}", appDirectory);
 }
 
 async Task CommandAsync(string arguments, string workingDirectory)
